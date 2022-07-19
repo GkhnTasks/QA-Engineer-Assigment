@@ -8,8 +8,26 @@ jobs:
       # Checkout the source code so we have some files to look at.
       - uses: actions/checkout@v2
       # Run the actual merge conflict finder
-      - name: Merge Conflict finder
-        uses: olivernybroe/action-conflict-finder@v2.0
+      - name: Merge Conflict Finder
+        uses: olivernybroe/action-conflict-finder@v3.0
+
         with:
           exclude_dir: "path/to/ignore,path/to/ignore2"
           excludes: "ignore.me,*.zip"
+
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        if: |
+            failure() &&
+            github.event_name != 'pull_request'
+        env:
+            MSG_MINIMAL: true
+            SLACK_COLOR: danger
+            SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+            SLACK_ICON: https://avatars.slack-edge.com/2021-03-08/1825511784502_89ec91ee3db53a0ac580_48.png
+            SLACK_USERNAME: GitHub Actions
+            SLACK_TITLE: Web Y build failed for `${{ github.ref }}`
+            SLACK_MESSAGE: |
+              See details: <${{ env.REPO_URL }}/commit/${{ github.sha }}|(Commit)> <${{ env.REPO_URL }}/actions/runs/${{ github.run_id }}|(Action run)>
+            SLACK_FOOTER: ''
+
